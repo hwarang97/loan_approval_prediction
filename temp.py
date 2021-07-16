@@ -1,1 +1,3 @@
-print('hellow world')
+import matplotlib.pyplot as plt
+
+fig, axes = plt.subplots()
