@@ -170,3 +170,6 @@ print("Training Data F1 Score: ", f1_score(y_train, y_pred))
 # 결과 평가 ( f1_score, accracy에 대해서 추후 조사 필요)
 print("Validation Mean F1 Score : ", cross_val_score(tree_clf, X_train, y_train, cv=5, scoring='f1_macro').mean())
 print("Validation Mean Accuracy : ", cross_val_score(tree_clf, X_train, y_train, cv=5, scoring='accuracy').mean())
+
+# 일단 여기까지 하고 추후에 설명을 달아서 마저 진행해보도록 하자.
+# 이제 얼마 안남았으니 조금만 더 힘내서 끝내보자.
