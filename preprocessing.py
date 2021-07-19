@@ -79,6 +79,7 @@ maplotlib 구동 방식이 크게 2가지로 있다.
 
 plt.subplots()함수는 figure 객체를 생성하고 figure.subplots()를 호출하여 리턴
 만약 figure, axes = plt.subplots(4,2)라고 하면 4행 2열로 총 8개의 axes가 만들어지고 2차원 배열로 axes 변수에 저장된다.
+===================================================================
 """
 
 # subplots는 한 화면에 여러개의 그래프를 그릴때 사용.
@@ -106,5 +107,66 @@ for idx, cat_col in enumerate(numerical_columns):
 print(train_df[numerical_columns].describe())
 plt.subplots_adjust(hspace=1)
 plt.show()
+
 # 정수형 변수들은 박스형태로 보는것이 더 좋은가?
 # 정수형 변수들에서는 딱히 결정적인 관계를 나타내는것을 찾지는 못하겠다.
+
+
+""" 
+================ 범주형 데이터 엔코딩 ========================  
+컴퓨터는 숫자를 이해할 수 있어서 문자를 수치적으로 바꾸는 작업이 필요하다. 이 작업을 엔코딩이라고 하는것 같다.
+여기서 가변수라는 개념이 등장한다. 범주형 데이터를 단순히 수치적으로 나타내게 된다면 의도하지 않은 관계성이 생길 수 있다.
+예를 들면 요일이라는 변수에 월요일은 1, 화요일은 2 이런식으로 쓰게 된다면 4.5요일에 어떤 특징이 두드러진다같은 있을 수 없는 결론을 얻을지도 모른다.
+따라서 범주형 각 값을 변수로 만들고 해당 변수를 0과1을 통해서 어떤 요일에 해당하는지로 나타낸는 개념이라고 보면 된다. ( https://devuna.tistory.com/67 )
+==========================================================
+"""
+
+print(train_df.head())
+train_df_encoded = pd.get_dummies(train_df, drop_first=True) # 결측치를 제외한 0과1로 구성된 더미값이 만들어진다. 옵션(dummy_na=True)를 설정하면 결측값도 더미값이된다.
+print(train_df_encoded.head())
+
+# 독립변수와 종속변수를 각가 X, y로 설정
+X = train_df_encoded.drop(columns='Loan_Status_Y') # 더미값이 '변수명_값' 형식으로 생성되는것 같다.
+y = train_df_encoded['Loan_Status_Y']
+
+# 학습 데이터와 평가 데이터를 나누어주는 함수 호출
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,stratify=y, random_state=42)
+
+"""
+=============== 결측치 대체(imputation) ==========================
+
+불완전한 데이터셋은 사용하기 힘들다. 따라서 불완전한 부분을 완전하게 만들어줘야한다.
+이때 사용하는 방법 중 가장 간단한 것은 결측치가 포함된 열과 행을 버리는 것이다. 그러나 이 방법은 중요한 변수를 희생할수도 있다는 것이다.
+그래서 더 나은 방법으로 값을 대체한다. 
+
+대체 알고리즘은 크게 2가지가 있는데, 
+하나는 한 변수에서 결측치가 아닌 값들을 이용해서 결측치 값을 추정하는것이고 ( univariate imputation )
+다른 하나는 사용할 수 있는 여러 변수값들을 이용해서 해당 변수의 결측치를 추정하는 것이다. ( multivariate imputation )
+여기서 사용하는 SimpleImputer는 univariate imputation에 해당된다. ( 출저 : https://scikit-learn.org/stable/modules/impute.html#impute )
+
+univariate imputation은 지정된 값 혹은 결측치 변수의 통계값(mean, median, most frequent and so on)으로 대체할 수 있다. 
+================================================================
+"""
+
+# 결측치는 각 해당 변수의 평균값으로 대체
+from sklearn.impute import SimpleImputer # impute는 결측치를 특정값으로 대체하는 방법
+imp = SimpleImputer(strategy='mean') # 평균값으로 대체해줄 imputer 선언 ( 어떤 값으로 대체하는지에 대한 기준은 잘 모르겠다. )
+imp_train = imp.fit(X_train)
+X_train = imp_train.transform(X_train)
+X_test_imp = imp_train.transform(X_test)
+
+# 모델 생성 : decision tree classifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import cross_val_score
+from sklearn.metrics import accuracy_score, f1_score
+
+tree_clf = DecisionTreeClassifier()
+tree_clf.fit(X_train, y_train)
+y_pred = tree_clf.predict(X_train)
+print("Training Data Set Accuracy: ", accuracy_score(y_train, y_pred))
+print("Training Data F1 Score: ", f1_score(y_train, y_pred))
+
+# 결과 평가 ( f1_score, accracy에 대해서 추후 조사 필요)
+print("Validation Mean F1 Score : ", cross_val_score(tree_clf, X_train, y_train, cv=5, scoring='f1_macro').mean())
+print("Validation Mean Accuracy : ", cross_val_score(tree_clf, X_train, y_train, cv=5, scoring='accuracy').mean())
