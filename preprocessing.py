@@ -158,8 +158,18 @@ X_test_imp = imp_train.transform(X_test)
 
 # 모델 생성 : decision tree classifier
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import accuracy_score, f1_score
+from sklearn.model_selection import cross_val_score # sklearn.model_selection은 데이터를 나누고 검증할 때 사용되는 모듈이다.
+from sklearn.metrics import accuracy_score, f1_score #sklearn.metrics은 scikit-learn 패키지 중에서 모델 평가에 사용되는 모듈이다.
+
+"""
+==================== 의사결정트리 알고리즘(decision tree algorithm) ===========================
+데이터에 있는 규칙을 학습을 통해 자동으로 찾아내 트리 기반의 분류 규칙을 만드는 알고리즘이다.
+(if, else 문등을 이용하는 것처럼 이용해서 규칙을 만들고 예측하는거라고 생각하면 된다. )
+
+장점 : 쉽고 직관적이다, 각 변수의 스케일이나 정규화에 영향을 크게 받지 않는다.
+단점 : 규칙이 많아질수록 모델이 복잡해지고 과적합이 일어난다. 그래서 트리의 크기를 사전에 제한하는 튜닝이 필요하다.
+===========================================================================================
+"""
 
 tree_clf = DecisionTreeClassifier()
 tree_clf.fit(X_train, y_train)
@@ -167,9 +177,24 @@ y_pred = tree_clf.predict(X_train)
 print("Training Data Set Accuracy: ", accuracy_score(y_train, y_pred))
 print("Training Data F1 Score: ", f1_score(y_train, y_pred))
 
-# 결과 평가 ( f1_score, accracy에 대해서 추후 조사 필요)
+"""
+======================== 알고리즘 성능 평가 ==============================
+머신러닝 알고리즘을 작성했다면 이제 얼마나 잘 작동하는지 확인하는 작업이 필요하다.
+평가 지표가 여러개가 있는데, Accuracy(정확도), Recall(재현율), Precision(정밀도), F1 Score 가 대표적이다.
+
+평가시 데이터를 4가지로 분류할 수 있다. (True positive, True negative, False positive, False negative )
+True : 예측이 성공한 경우
+False : 예측이 실패한 경우
+Positive : 기준값 이상이라고 예측한 경우
+Negative : 기준값 미만이라고 예측한 경우
+
+Accuracy : 전체 데이터 중에서 올바르게 분류한 데이터 수 ( True / All )
+Recall : 
+
+"""
+
+
+# 결과 평가
 print("Validation Mean F1 Score : ", cross_val_score(tree_clf, X_train, y_train, cv=5, scoring='f1_macro').mean())
 print("Validation Mean Accuracy : ", cross_val_score(tree_clf, X_train, y_train, cv=5, scoring='accuracy').mean())
 
-# 일단 여기까지 하고 추후에 설명을 달아서 마저 진행해보도록 하자.
-# 이제 얼마 안남았으니 조금만 더 힘내서 끝내보자.
