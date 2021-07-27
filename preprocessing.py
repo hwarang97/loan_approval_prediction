@@ -129,7 +129,7 @@ print(train_df_encoded.head())
 X = train_df_encoded.drop(columns='Loan_Status_Y') # 더미값이 '변수명_값' 형식으로 생성되는것 같다.
 y = train_df_encoded['Loan_Status_Y']
 
-# 학습 데이터와 평가 데이터를 나누어주는 함수 호출
+# 학습 데이터와 평가 데이터를 나누어주는 함수 호출 ( 8:2 비율로 데이터를 학습용과 실험용으로 나누었다. )
 from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X,y,test_size=0.2,stratify=y, random_state=42)
 
@@ -193,8 +193,35 @@ Recall :
 
 """
 
-
 # 결과 평가
 print("Validation Mean F1 Score : ", cross_val_score(tree_clf, X_train, y_train, cv=5, scoring='f1_macro').mean())
 print("Validation Mean Accuracy : ", cross_val_score(tree_clf, X_train, y_train, cv=5, scoring='accuracy').mean())
+
+"""
+========================== 결과 평가 분석 ==============================
+
+Training Data Set Accuracy : 1.0
+Training Data F1 Score " 1.0
+Validation Mean F1 Score : 0.688
+Validation Mean Accuracy : 0.737
+
+ 학습 데이터를 이용하여 과적합되었음을 유추하고 있다. 보통 학습 데이터와 실험 데이터를 비교해서 학습 데이터의 결과가 실험 데이터의 결과보다 지나치게 큰 경우
+과적합이라고 판단한다. 그런데 여기서는 교차 검증을 통해서 과적합을 유추하고 있다.
+
+ 그러나 위의 방법에는 약점이 존해하는데, 정해진 데이터를 통해 여러번 반복 학습하게 되어 정해진 데이터에만 최적화되는 현상이 생기게 된다. 
+따라서 실제로 아직 사용되지 않은 데이터 혹은 앞으로 생겨날 데이터들에 대해서는 엉뚱한 결과를 가져올 수 있다는 것이다. 그래서 교차검증(cross validation)을 사용한다.
+
+ 교차검증의 장점은 모든 데이터에 대해서 활용할 수 있으며 데이터가 적을 경우에도 사용할 수 있다. 그리고 적합현상을 방지할 수 있다. ( 일반적인 모델 형성 )
+단점으로는 반복 횟수가 더 많아지기때문에 훈련, 평가시간이 오래 걸린다.
+
+ 교차검증은 데이터를 여러개로 나누고 그 하나를 fold라고 부른다. 이 모든 fold 중에서 하나를 검증 데이터로, 나머지는 학습 데이터로 사용한다.
+이 과정을 모든 fold가 한번씩 검증 데이터로 사용될때까지 진행한다. 이를 통해서 주어진 데이터내에서 상대적으로 일반적인 평가를 얻을 수 있다는것 같다.
+
+ 이를 통해 결과를 분석해보면 학습 데이터의 Accuracy와 F1 Score가 1.0인것에 반해 Validation score은 각각 0.688, 0.737로 큰 차이가 있다.
+따라서 과적합이 생겼다고 유추할 수 있다. 
+
+의문점 : 의사결정트리에서 같은 데이터를 여러번 사용하는 과정이 있나?
+        있으니까 교차검증을 썼겠지만, 확인은 해봐야할 것 같다.
+======================================================================
+"""
 
