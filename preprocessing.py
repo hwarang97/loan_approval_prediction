@@ -190,7 +190,7 @@ Negative : 기준값 미만이라고 예측한 경우
 
 Accuracy : 전체 데이터 중에서 올바르게 분류한 데이터 수 ( True / All )
 Recall : 
-
+======================================================================
 """
 
 # 결과 평가
@@ -225,3 +225,18 @@ Validation Mean Accuracy : 0.737
 ======================================================================
 """
 
+training_accuracy = []
+val_accuracy = []
+training_f1 = []
+val_f1 = []
+tree_depths = []
+
+for depth in range(1,20):
+    tree_clf = DecisionTreeClassifier(max_depth=depth)
+    tree_clf.fit(X_train, y_train)
+    y_training_pred = tree_clf.predict(X_train)
+
+    training_acc = accuracy_score(y_train, y_training_pred)
+    train_f1 = f1_score(y_train, y_training_pred)
+    val_mean_f1 = cross_val_score(tree_clf, X_train, y_train, cv=5, scoring='f1_macro').mean()
+    val_mean_accuracy = cross_val_score(tree_clf, X_train, y_train, cv=5, scoring='accuracy').mean()
