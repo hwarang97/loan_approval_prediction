@@ -240,3 +240,18 @@ for depth in range(1,20):
     train_f1 = f1_score(y_train, y_training_pred)
     val_mean_f1 = cross_val_score(tree_clf, X_train, y_train, cv=5, scoring='f1_macro').mean()
     val_mean_accuracy = cross_val_score(tree_clf, X_train, y_train, cv=5, scoring='accuracy').mean()
+
+    training_accuracy.append(training_acc)
+    val_accuracy.append(val_mean_accuracy)
+    training_f1.append(train_f1)
+    val_f1.append(val_mean_f1)
+    tree_depths.append(depth)
+
+Tuning_Max_depth = {"Training Accuracy" : training_accuracy, "Validation Accuracy" : val_accuracy,
+                    "Training F1" : training_f1, "Validation F1" : val_f1, "Max_Depth" : tree_depths}
+Tuning_Max_depth = pd.DataFrame.from_dict(Tuning_Max_depth)
+
+plot_df = Tuning_Max_depth.melt('Max_Depth', var_name='Metrics', value_name='Values')
+fig, ax = plt.subplots(figsize=(15,5))
+sns.pointplot(x="Max_Depth", y="Values", hue="Metrics", data=plot_df, ax=ax)
+plt.show()
