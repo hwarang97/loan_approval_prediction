@@ -40,6 +40,8 @@ train_df.info() # -> 데이터는 500행, 11열
 정확한 이유를 알 수 있다면 후에 서술해두어야겠다.
  ==========================================================
 """
+# 분석에 방해되는 ID 정보는 제거해두자. ( 이상한 관계를 생성할지도 모른다. )
+train_df = train_df.drop(columns=['Loan_ID'])
 
 # 여기서는 크게 범주형과 정수형으로 나누었다.
 categorical_columns = ['Gender', 'Married', 'Dependents', 'Education', 'Self_Employed', 'Property_Area', 'Credit_History', 'Loan_Amount_Term']
@@ -255,3 +257,19 @@ plot_df = Tuning_Max_depth.melt('Max_Depth', var_name='Metrics', value_name='Val
 fig, ax = plt.subplots(figsize=(15,5))
 sns.pointplot(x="Max_Depth", y="Values", hue="Metrics", data=plot_df, ax=ax)
 plt.show()
+
+"""
+============= 그래프 해석 ================
+그래프를 본다면 트리의 깊이가 깊어질수록 과적합이 발생한다는 것을 알 수 있다.
+그래도 어느정도 깊이가 있으면서도 과적합이 일어나지 않았다고 보이며 성능이 괜찮아보이는 지점은 깊이가 3,4 정도일 때 같다.
+========================================
+"""
+
+import graphviz
+from sklearn import tree
+
+tree_clf = tree.DecisionTreeClassifier(max_depth=3)
+tree_clf.fit(X_train, y_train)
+dot_data = tree.export_graphviz(tree_clf, feature_names = X.columns.tolist())
+graph = graphviz.Source(dot_data)
+print(graph)
